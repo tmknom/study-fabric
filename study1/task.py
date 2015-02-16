@@ -1,5 +1,3 @@
-# -*- encoding:utf-8 -*-
-
 from fabric.decorators import task
 
 @task
