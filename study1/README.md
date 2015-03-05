@@ -74,7 +74,7 @@ Available commands:
     two
 ```
 
-message.pyでは二つのメソッドを定義していて、それがきちんと表示されたね！
+multitask.pyでは二つのメソッドを定義していて、それがきちんと表示されたね！
 
 
 ## カラー出力
@@ -97,7 +97,14 @@ def failure():
 
 ```bash
 $ fab success -f color.py
+build success!
+
+Done.
+
 $ fab failure -f color.py
+build failure!!
+
+Done.
 ```
 
 最初は緑、次は赤で表示されれば成功だ！
