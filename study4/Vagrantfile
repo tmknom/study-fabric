@@ -1,0 +1,17 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "chef/centos-6.5"
+
+  config.vm.define "web_server" do |web|
+    web.vm.network :private_network, ip: "192.168.104.10"
+    web.vm.hostname = "web-server"
+  end
+
+  config.vm.define "db_server" do |db|
+    db.vm.network :private_network, ip: "192.168.104.11"
+    db.vm.hostname = "db-server"
+  end
+
+end
+
