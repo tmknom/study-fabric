@@ -4,7 +4,7 @@
 
 擬似的にリモートサーバを作成するため、Vagrantfileを用意する。
 
-```bash
+```ruby
 $ vi Vagrantfile
 
 VAGRANTFILE_API_VERSION = "2"
@@ -28,7 +28,7 @@ $ vagrant up
 
 今は詳細を無視して、とりあえず、このままコピペしてほしい。
 
-```bash
+```python
 $ vi fabfile.py
 
 from fabric.api import run, sudo
@@ -63,7 +63,7 @@ Disconnecting from 192.168.102.10... done.
 
 先ほどのfabfile.pyにremote_runタスクを追記しよう。
 
-```bash
+```python
 $ vi fabfile.py
 
 def remote_run():
@@ -95,7 +95,7 @@ Sun Feb 15 15:41:12 UTC 2015
 
 fabfile.pyにremote_sudoタスクを追記してみよう。
 
-```bash
+```python
 $ vi fabfile.py
 
 def remote_sudo():
@@ -133,7 +133,7 @@ sudoでコマンド実行されたことが確認できたね！
 
 では、fabfile.pyにremote_sudo_other_userタスクを追記しよう。
 
-```bash
+```python
 $ vi fabfile.py
 
 def remote_sudo_other_user():
@@ -170,6 +170,11 @@ vagrant
 「えっ、こんだけ？」と思われるかもしれないが、これだけだ。
 
 実行したいコマンドをrunかsudoで囲めば終了という、圧倒的な学習コストの低さがFabricの魅力なのだ！
+
+こんなに簡単で便利なのに、使わない手はないよね！！
+
+
+## 後始末
 
 では、最後に忘れずに後始末しておこう。
 
