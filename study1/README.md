@@ -51,6 +51,20 @@ Done.
 
 複数のタスクも同時に実行できる。
 
+メソッドを二つ定義してみよう。
+
+```python
+$ vi multitask.py
+
+def one():
+  print("one!")
+
+def two():
+  print("two!!")
+```
+
+では実行。
+
 ```bash
 $ fab one two -f multitask.py
 one!
@@ -74,7 +88,7 @@ Available commands:
     two
 ```
 
-multitask.pyでは二つのメソッドを定義していて、それがきちんと表示されたね！
+定義した二つのメソッドがきちんと表示されたね！
 
 
 ## カラー出力
@@ -112,7 +126,9 @@ Done.
 
 ## タスク定義
 
-fabricでは、タスクを明示的に指定できる。メソッド名の上に"@task"とつけるだけでいい。
+fabricでは、タスクを明示的に指定できる。
+
+メソッド名の上に"@task"とつけるだけでいい。
 
 ```python
 $ vi task.py
@@ -199,7 +215,9 @@ Done.
 
 ## ローカルでコマンド実行
 
-いよいよローカルでのコマンド実行を試してみるぞ。localメソッドを使うだけで実現できる。
+いよいよローカルでのコマンド実行を試してみるぞ。
+
+localメソッドを使うだけで実現できる。
 
 ```python
 $ vi local.py
