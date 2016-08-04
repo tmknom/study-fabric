@@ -1,24 +1,13 @@
 # リモートサーバを操作してみよう！
 
-## リモート環境の構築
+## SSHの確認
 
-擬似的にリモートサーバを作成するため、Vagrantfileを用意する。
+Fabricの前にSSHで接続できることを確認しておこう。
 
-```ruby
-$ vi Vagrantfile
-
-VAGRANTFILE_API_VERSION = "2"
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "chef/centos-6.5"
-  config.vm.network :private_network, ip: "192.168.102.10"
-end
-```
-
-では起動しよう。
+あとで、Fabricの実行結果を確認するのにログインするので、別ターミナルを立ち上げておくのがオススメだ。
 
 ```bash
-$ vagrant up
+$ ssh -l ec2-user -i ~/.ssh/playground-development.pem xx.xx.xx.xx
 ```
 
 
@@ -39,19 +28,17 @@ def connect():
 
 では、実行だ。
 
-ここでのポイントは、接続先ホスト、ログインユーザ名、パスワードを指定しているところだ。
+ここでのポイントは、接続先ホスト、ログインユーザ名、SSH鍵を指定しているところだ。
 
 ```bash
-$ fab connect -H 192.168.102.10 -u vagrant -p vagrant
-[192.168.102.10] Executing task 'connect'
-[192.168.102.10] run: uname -a
-[192.168.102.10] out: Linux localhost.localdomain 2.6.32-431.el6.x86_64 #1 SMP 
-Fri Nov 22 03:15:09 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
-[192.168.102.10] out:
-
+$ fab connect -u ec2-user -i ~/.ssh/playground-development.pem -H xx.xx.xx.xx
+[xx.xx.xx.xx] Executing task 'connect'
+[xx.xx.xx.xx] run: uname -a
+[xx.xx.xx.xx] out: Linux ip-xx-xx-xx-xx 4.4.11-23.53.amzn1.x86_64 #1 SMP Wed Jun 1 22:22:50 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+[xx.xx.xx.xx] out:
 
 Done.
-Disconnecting from 192.168.102.10... done.
+Disconnecting from xx.xx.xx.xx... done.
 ```
 
 こんな感じで表示されればOKだ！
@@ -68,22 +55,21 @@ $ vi fabfile.py
 
 def remote_run():
   run("whoami")
-  run("date > remote_run.log")
+  run("date > /tmp/remote_run.log")
 ```
 
 実行してみよう。
 
 
 ```bash
-$ fab remote_run -H 192.168.102.10 -u vagrant -p vagrant
+$ fab remote_run -u ec2-user -i ~/.ssh/playground-development.pem -H xx.xx.xx.xx
 ```
 
 リモートサーバにログインして確認してみよう。
 
 ```bash
-$ vagrant ssh
-[vagrant ~]$ cat remote_run.log
-Sun Feb 15 15:41:12 UTC 2015
+[remote ~]$ cat /tmp/remote_run.log
+Thu Aug  4 02:01:00 UTC 2016
 ```
 
 たしかに、時刻情報が書かれたファイルが作成できたね！
@@ -101,24 +87,23 @@ $ vi fabfile.py
 def remote_sudo():
   sudo("whoami")
   sudo("yum -y install httpd")
-  sudo("whoami > remote_sudo_root.log")
+  sudo("whoami > /tmp/remote_sudo_root.log")
 ```
 
 では実行してみよう。
 
 
 ```bash
-$ fab remote_sudo -H 192.168.102.10 -u vagrant -p vagrant
+$ fab remote_sudo -u ec2-user -i ~/.ssh/playground-development.pem -H xx.xx.xx.xx
 ```
 
-ログインして確認してみよう。
+リモートサーバ側で確認してみよう。
 
 
 ```bash
-$ vagrant ssh
-[vagrant ~]$ which httpd
+[remote ~]$ which httpd
 /usr/sbin/httpd
-[vagrant ~]$ cat remote_sudo_root.log
+[remote ~]$ cat /tmp/remote_sudo_root.log
 root
 ```
 
@@ -137,29 +122,25 @@ sudoでコマンド実行されたことが確認できたね！
 $ vi fabfile.py
 
 def remote_sudo_other_user():
-  sudo("whoami > remote_sudo_vagrant.log", user='vagrant')
+  sudo("whoami > /tmp/remote_sudo_apache.log", user='apache')
 ```
 
 実行してみる。
 
 ```bash
-$ fab remote_sudo_other_user -H 192.168.102.10 -u vagrant -p vagrant
+$ fab remote_sudo_other_user -u ec2-user -i ~/.ssh/playground-development.pem -H xx.xx.xx.xx
 ```
 
 では、確認だ。
 
 
 ```bash
-$ vagrant ssh
-
-[vagrant ~]$ cat remote_sudo_vagrant.log
-vagrant
-
-[vagrant ~]$ ls -l
-合計 12
--rw-rw-r--. 1 vagrant vagrant 29  2月 15 16:02 2015 remote_run.log
--rw-r--r--. 1 root    root     5  2月 15 16:13 2015 remote_sudo_root.log
--rw-rw-r--. 1 vagrant vagrant  8  2月 15 16:15 2015 remote_sudo_vagrant.log
+[remote ~]$ cat /tmp/remote_sudo_apache.log
+apache
+[remote ~]$ ls -l /tmp/*.log
+-rw-rw-r-- 1 ec2-user ec2-user 29  8月  4 02:01 /tmp/remote_run.log
+-rw-r--r-- 1 apache   apache    7  8月  4 02:03 /tmp/remote_sudo_apache.log
+-rw-r--r-- 1 root     root      5  8月  4 02:02 /tmp/remote_sudo_root.log
 ```
 
 確かに指定したユーザで実行されたことが確認できるね。
@@ -172,13 +153,4 @@ vagrant
 実行したいコマンドをrunかsudoで囲めば終了という、圧倒的な学習コストの低さがFabricの魅力なのだ！
 
 こんなに簡単で便利なのに、使わない手はないよね！！
-
-
-## 後始末
-
-では、最後に忘れずに後始末しておこう。
-
-```bash
-$ vagrant destroy -f
-```
 
