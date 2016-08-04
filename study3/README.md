@@ -1,28 +1,5 @@
 # ファイルの送受信と実行ディレクトリの指定
 
-## リモート環境の構築
-
-改めてVagrantfileを用意する。
-
-study2と違うのはIPアドレスだけなので、study2のモノをそのまま流用してもらってもいいぞ！
-
-```ruby
-$ vi Vagrantfile
-
-VAGRANTFILE_API_VERSION = "2"
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "chef/centos-6.5"
-  config.vm.network :private_network, ip: "192.168.103.10"
-end
-```
-
-では起動しよう。
-
-```bash
-$ vagrant up
-```
-
 ## 接続先ホストの設定
 
 study2では接続先情報をコマンドの引数で渡していたけど、fabfile.pyに事前に書いておくこともできる。
@@ -32,9 +9,9 @@ $ vi fabfile.py
 
 from fabric.api import local, run, env, put, get, cd, lcd
 
-env.hosts = ['192.168.103.10']
-env.user = 'vagrant'
-env.password = 'vagrant'
+env.hosts = ['xx.xx.xx.xx']
+env.user = 'ec2-user'
+env.key_filename = ['~/.ssh/playground-development.pem']
 
 def execute():
   run("uname -a")
@@ -73,12 +50,10 @@ $ fab upload
 
 ```bash
 $ cat local.txt
-2015年 2月16日 月曜日 01時41分31秒 JST
+2016年 8月 4日 木曜日 11時09分22秒 JST
 
-$ vagrant ssh
-
-[vagrant ~]$ cat ~/local.txt
-2015年 2月16日 月曜日 01時41分31秒 JST
+[remote ~]$ cat ~/local.txt
+2016年 8月 4日 木曜日 11時09分22秒 JST
 ```
 
 確かに、ローカルに作成されたファイルが、サーバへもアップロードされているね！
@@ -108,13 +83,11 @@ $ fab download
 では、確認だ。
 
 ```bash
-$ vagrant ssh
-
-[vagrant ~]$ cat ~/remote.txt
-Sun Feb 15 16:42:53 UTC 2015
+[remote ~]$ cat ~/remote.txt
+Thu Aug  4 02:11:06 UTC 2016
 
 $ cat remote.txt
-Sun Feb 15 16:42:53 UTC 2015
+Thu Aug  4 02:11:06 UTC 2016
 ```
 
 たしかに、リモートで作成されたファイルが、ダウンロードできているね！
@@ -139,7 +112,7 @@ def with_local():
 
 ```bash
 $ fab with_local
-[192.168.103.10] Executing task 'with_local'
+[xx.xx.xx.xx] Executing task 'with_local'
 [localhost] local: pwd
 /path/to/study-fabric/study3
 [localhost] local: pwd
@@ -162,7 +135,7 @@ $ vi fabfile.py
 
 def with_remote():
   run("pwd")
-  with cd('/vagrant'):
+  with cd('../'):
     run("pwd")
 ```
 
@@ -170,18 +143,18 @@ def with_remote():
 
 ```bash
 $  fab with_remote
-[192.168.103.10] Executing task 'with_remote'
-[192.168.103.10] run: pwd
-[192.168.103.10] out: /home/vagrant
-[192.168.103.10] out:
+[xx.xx.xx.xx] Executing task 'with_remote'
+[xx.xx.xx.xx] run: pwd
+[xx.xx.xx.xx] out: /home/ec2-user
+[xx.xx.xx.xx] out:
 
-[192.168.103.10] run: pwd
-[192.168.103.10] out: /vagrant
-[192.168.103.10] out:
+[xx.xx.xx.xx] run: pwd
+[xx.xx.xx.xx] out: /home
+[xx.xx.xx.xx] out:
 
 
 Done.
-Disconnecting from 192.168.103.10... done.
+Disconnecting from xx.xx.xx.xx... done.
 ```
 
 ローカルの時と同様、cdされて実行されていることが確認できた！
@@ -196,13 +169,4 @@ Fabric単体でできることは、この時点でほぼできるようにな�
 もちろん、Fabricには他にも色々機能があって、もっと複雑なこともできるけど、まずはシンプルに使い始めよう！
 
 ここから先は[Fabricのドキュメント](http://fabric-ja.readthedocs.org/ja/latest/)を必要に応じて参照するぐらいで十分だ。
-
-
-## 後始末
-
-では、忘れずに後始末しておく。
-
-```bash
-$ vagrant destroy -f
-```
 

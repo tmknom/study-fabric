@@ -1,8 +1,8 @@
 from fabric.api import local, run, env, put, get, cd, lcd
 
-env.hosts = ['192.168.103.10']
-env.user = 'vagrant'
-env.password = 'vagrant'
+env.hosts = ['xx.xx.xx.xx']
+env.user = 'ec2-user'
+env.key_filename = ['~/.ssh/playground-development.pem']
 
 
 def execute():
@@ -27,6 +27,6 @@ def with_local():
 
 def with_remote():
   run("pwd")
-  with cd('/vagrant'):
+  with cd('../'):
     run("pwd")
 
